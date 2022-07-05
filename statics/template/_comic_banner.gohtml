@@ -1,0 +1,58 @@
+{{define "_comic_banner"}}
+<div class="bg-white rounded-4xl" style="background:url('{{.CoverPath}}');background-size:cover;backdrop-filter:blur(10px);background-position:center;background-repeat:no-repeat;background-attachment:fixed">
+        <div class="w-full backdrop-blur bg-blend-darken  hover:bg-blend-lighten rounded-t-3xl h-[50vh] bg-fixed flex-row sm:flex items-center justify-evenly">
+          <h2 class="text-2xl sm:text-5xl text-white drop-shadow-xl text-center pt-3">
+          {{.Name}}
+          </h2>
+          <div class="flex justify-center mt-3">
+            <img src="{{.CoverPath}}" class="rounded-2xl h-[30vh]">
+          </div>
+        </div>
+        <div class="bg-white rounded-4xl  pt-4 w-full">
+          <div class="px-4">
+            <p class="text-md text-gray-600">
+            {{.Description}}
+            </p>
+          </div>
+          <div class="px-4">
+            <div class="flex mt-4 w-full bg-[#fef6e3] py-4 rounded-2xl text-black">
+              <div class="flex-1 text-center">
+                <div class="text-xl font-semibold text-[#f2a930]">
+                {{.NumberOfEpisodes}}
+                </div>
+                <div class="text-xs font-semibold">قسمت
+                </div>
+              </div>
+              <div class="flex-1 text-center">
+                <div class="text-xl font-semibold text-[#f2a930]">
+                {{.Status}}
+                </div>
+                <div class="text-xs font-semibold">وضعیت
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-3 flex justify-center">
+              <a class="w-full" href="/series/comic-sexy-hot-farsi-sarrast/1-lesbian">
+                <button class="items-center text-gray-800 transition-all  font-semibold rounded-xl outline-none w-full sm:w-full py-2 pl-5 pr-5 mb-3 sm:mb-0 h-10 active:scale-90 hover:bg-opacity-90 focus:ring-2 active:bg-opacity-80 bg-[#f7cc5f] ring-[#f7cc5f]" type="button">قسمت اول
+                </button>
+              </a>
+            </div>
+          </div>
+          <div class="px-4 mt-1 w-full sticky top-0">
+            <div class="rounded-3xl overflow-hidden relative top-4">
+              <div class="flex flex-row justify-between items-center w-full h-11 px-1.5 bg-[#edf1f8]">
+                <a aria-current="page" class="h-8 text-sm rounded-2xl w-full active:scale-90 hover:scale-95 text-gray-900 font-semibold bg-white shadow-link active" href="/series/comic-sexy-hot-farsi-sarrast">
+                  <button class="h-8 text-sm rounded-2xl w-full active:scale-90 hover:scale-95 text-gray-900 font-semibold ">قسمت ها
+                  </button>
+                </a>
+                <a class="h-8 text-sm rounded-2xl w-full active:scale-90 hover:scale-95 text-gray-900 font-semibold" href="/series/comic-sexy-hot-farsi-sarrast/comments">
+                  <button class="h-8 text-sm rounded-2xl w-full active:scale-90 hover:scale-95 text-gray-900 font-semibold ">کامنت ها
+                  </button>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+</div>
+{{end}}

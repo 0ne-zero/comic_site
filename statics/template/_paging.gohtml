@@ -1,0 +1,145 @@
+{{define "_paging"}}
+{{$is_get := IsGetParameterExists .URL}}
+
+{{if $is_get}}
+    {{if eq .TotalPage 1}}
+    <div class="flex justify-center bg-white rounded-lg p-3">
+        <span class="w-8 h-8 bg-yellow-400 rounded-xl flex items-center justify-center text-white">1</span>
+    </div>
+    {{else}}
+        {{if eq .SelectedPage 1}}
+            <div class="flex justify-center bg-white rounded-lg p-3">
+                <span class="w-8 h-8 bg-yellow-400 rounded-xl flex items-center justify-center text-white">1</span>
+                {{if lt .DistanceToLast 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page=2">2</a>
+                {{else}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page=2">2</a>
+                    <span class="w-8 flex items-center justify-center">...</span>
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page={{.TotalPage}}">{{.TotalPage}}</a>
+                {{end}}
+            </div>
+        {{else if eq .SelectedPage .TotalPage}}
+            <div class="flex justify-center bg-white rounded-lg p-3">
+                {{if lt .DistanceToFirst 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page=1">1</a>
+                {{else}}
+                <a class="w-8 flex items-center justify-center " href="{{.URL}}&page=1">1</a>
+                <span class="w-8 flex items-center justify-center">...</span>
+                <a class="w-8 flex items-center justify-center " href="{{.URL}}&page={{Minus .TotalPage 1}}">{{Minus .TotalPage 1}}</a>
+                {{end}}
+                <span class="w-8 h-8 bg-yellow-400 rounded-xl flex items-center justify-center text-white">{{.TotalPage}}</span>
+            </div>
+        {{else}}
+            {{if ge .DistanceToLast .DistanceToFirst}}
+                {{if lt .DistanceToFirst 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page=1">1</a>
+                {{else}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page=1">1</a>
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page={{Minus .SelectedPage 1}}">{{Minus .SelectedPage 1}}</a>
+                {{end}}
+                
+
+                <span class="w-8 h-8 bg-yellow-400 rounded-xl flex items-center justify-center text-white">{{.SelectedPage}}</span>    
+
+                {{if lt .DistanceToLast 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page={{.TotalPage}}">{{.TotalPage}}</a>
+                {{else}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page={{Plus .SelectedPage 1}}">{{Plus .SelectedPage 1}}</a>
+                    <span class="w-8 flex items-center justify-center">...</span>
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page={{.TotalPage}}">{{.TotalPage}}</a>
+                {{end}}
+
+            {{else}}
+                {{if lt .DistanceToFirst 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page=1">1</a>
+                {{else}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page=1">1</a>
+                    <span class="w-8 flex items-center justify-center">...</span>
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page={{Minus .SelectedPage 1}}">{{Minus .SelectedPage 1}}</a>
+                {{end}}
+                
+
+                <span class="w-8 h-8 bg-yellow-400 rounded-xl flex items-center justify-center text-white">{{.SelectedPage}}</span>    
+
+                {{if lt .DistanceToLast 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page={{.TotalPage}}">{{.TotalPage}}</a>
+                {{else}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page={{Plus .SelectedPage 1}}">{{Plus .SelectedPage 1}}</a>
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}&page={{.TotalPage}}">{{.TotalPage}}</a>
+                {{end}}
+            {{end}}
+        {{end}}
+
+    {{end}}
+{{else}}
+    {{if eq .TotalPage 1}}
+    <div class="flex justify-center bg-white rounded-lg p-3">
+        <span class="w-8 h-8 bg-yellow-400 rounded-xl flex items-center justify-center text-white">1</span>
+    </div>
+    {{else}}
+        {{if eq .SelectedPage 1}}
+            <div class="flex justify-center bg-white rounded-lg p-3">
+                <span class="w-8 h-8 bg-yellow-400 rounded-xl flex items-center justify-center text-white">1</span>
+                {{if lt .DistanceToLast 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page=2">2</a>
+                {{else}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}page=2">2</a>
+                    <span class="w-8 flex items-center justify-center">...</span>
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}page={{.TotalPage}}">{{.TotalPage}}</a>
+                {{end}}
+            </div>
+        {{else if eq .SelectedPage .TotalPage}}
+            <div class="flex justify-center bg-white rounded-lg p-3">
+                {{if lt .DistanceToFirst 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page=1">1</a>
+                {{else}}
+                <a class="w-8 flex items-center justify-center " href="{{.URL}}?page=1">1</a>
+                <span class="w-8 flex items-center justify-center">...</span>
+                <a class="w-8 flex items-center justify-center " href="{{.URL}}?page={{Minus .TotalPage 1}}">{{Minus .TotalPage 1}}</a>
+                {{end}}
+                <span class="w-8 h-8 bg-yellow-400 rounded-xl flex items-center justify-center text-white">{{.TotalPage}}</span>
+            </div>
+        {{else}}
+            {{if ge .DistanceToLast .DistanceToFirst}}
+                {{if lt .DistanceToFirst 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page=1">1</a>
+                {{else}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page=1">1</a>
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page={{Minus .SelectedPage 1}}">{{Minus .SelectedPage 1}}</a>
+                {{end}}
+                
+
+                <span class="w-8 h-8 bg-yellow-400 rounded-xl flex items-center justify-center text-white">{{.SelectedPage}}</span>    
+
+                {{if lt .DistanceToLast 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page={{.TotalPage}}">{{.TotalPage}}</a>
+                {{else}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page={{Plus .SelectedPage 1}}">{{Plus .SelectedPage 1}}</a>
+                    <span class="w-8 flex items-center justify-center">...</span>
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page={{.TotalPage}}">{{.TotalPage}}</a>
+                {{end}}
+
+            {{else}}
+                {{if lt .DistanceToFirst 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page=1">1</a>
+                {{else}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page=1">1</a>
+                    <span class="w-8 flex items-center justify-center">...</span>
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page={{Minus .SelectedPage 1}}">{{Minus .SelectedPage 1}}</a>
+                {{end}}
+                
+
+                <span class="w-8 h-8 bg-yellow-400 rounded-xl flex items-center justify-center text-white">{{.SelectedPage}}</span>    
+
+                {{if lt .DistanceToLast 2}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page={{.TotalPage}}">{{.TotalPage}}</a>
+                {{else}}
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page={{Plus .SelectedPage 1}}">{{Plus .SelectedPage 1}}</a>
+                    <a class="w-8 flex items-center justify-center " href="{{.URL}}?page={{.TotalPage}}">{{.TotalPage}}</a>
+                {{end}}
+            {{end}}
+        {{end}}
+
+    {{end}}
+{{end}}
+{{end}}

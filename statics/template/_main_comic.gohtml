@@ -1,0 +1,41 @@
+{{define "_main_comic"}}
+<div class="info-data pb-2">
+  <div class="flex flex-row sm:mt-4 mb-4 p-2">
+    <div class="sm:mr-6">
+      <img src="{{.CoverPath}}" alt="" class="min-w-[180px] h-[240px] rounded-4xl shadow-lg hidden sm:block" width="180" height="240">
+    </div>
+    <div class="px-3 sm:px-6">
+      <div class="p-2 text-sm">
+      {{.Status}}
+      </div>
+      <div class="justify-between items-center pt-2 flex">
+        <h1 class="text-gray-900 break-words mt-1">
+        {{.Name}}
+        </h1>
+        <div class="text-[.625rem] font-light">
+        {{.CreatedAt | HowManyAgo}}
+        </div>
+      </div>
+      <p class="recommended-description pt-2 text-gray-500 text-sm font-semibold">
+      {{.Description}}
+      </p>
+      <div class="h-12 bg-[#fef6e3] rounded-lg flex items-center px-3 mt-4">
+        <h4 class="text-gray-400">قسمت {{.NumberOfEpisodes}}
+        </h4>
+      </div>
+      <div class="border  mt-5 mb-4 border-[#eceff1] mx-6">
+      </div>
+      <div class="flex flex-row items-center justify-between">
+        <div class="ml-1 font-medium text-sm text-white">ـ
+        </div>
+        <div> 
+          <a href="/comic/{{.ID}}">
+            <button class="items-center text-gray-800 transition-all  font-semibold rounded-xl outline-none w-full sm:w-48 py-2 pl-5 pr-5 mb-3 sm:mb-0 h-10 active:scale-90 hover:bg-opacity-90 focus:ring-2 active:bg-opacity-80 bg-[#f7cc5f] ring-[#f7cc5f]" type="button">خواندن
+            </button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}

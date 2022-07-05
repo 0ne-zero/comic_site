@@ -1,0 +1,28 @@
+{{define "_comic_index"}}
+<a href="/comic/{{.ID}}">
+    <div class="bg-white  p-1 flex flex-row-reverse mb-4 shadow hover:shadow-lg ring-gray-900">
+      <img src="{{.CoverPath}}" loading="lazy" class="w-[180px] min-w-180px  h-[240px] hidden sm:block" alt="" width="180" height="240">
+      <div class="p-2 w-full px-2 sm:px-6">
+        <div class="py-2 text-xs flex justify-between">
+          <div>
+          {{.Status}}
+          </div>
+          <div class="text-[.625rem]">
+          {{.CreatedAt | HowManyAgo}}
+          </div>
+        </div>
+        <h3 class="text-gray-900 mt-4">
+        {{.Name}}
+        </h3>
+        <p class="recommended-description text-gray-500 text-sm pt-2 max-w-[320px]">
+        {{.Description}}
+        </p>
+        <div class="h-12 bg-[#fef6e3] rounded-lg flex items-center px-3 mt-8">
+          <h4 class="text-gray-400">
+          قسمت {{.NumberOfEpisodes}}
+          </h4>
+        </div>
+      </div>
+    </div>
+</a>
+{{end}}
