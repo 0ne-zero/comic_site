@@ -59,7 +59,33 @@ func GetComicOrderByUpdate(limit int, offset int) ([]viewmodel.ComicViewModel, e
 	err = db.Model(&model.Comic{}).Order("last_episode_time DESC").Limit(limit).Offset(offset).Scan(&vms).Error
 	return vms, err
 }
-
+func GetAllTagsName() ([]string, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return nil, err
+	}
+	var tags []string
+	err = db.Model(&model.ComicTag{}).Select("name").Scan(&tags).Error
+	return tags, err
+}
+func GetTagsWithLimit(limit int) ([]string, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return nil, err
+	}
+	var tags []string
+	err = db.Model(&model.ComicTag{}).Select("name").Limit(limit).Scan(&tags).Error
+	return tags, err
+}
+func IsTagExistsByName(tag_name string) (bool, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return false, err
+	}
+	var exists bool
+	err = db.Model(&model.ComicTag{}).Select("count(*) > 0").Where("name = ?", tag_name).Scan(&exists).Error
+	return exists, err
+}
 func GetComicByID(id int) (*viewmodel.ComicViewModel, error) {
 	db, err := database.InitializeOrGetDB()
 	if err != nil {
@@ -68,6 +94,48 @@ func GetComicByID(id int) (*viewmodel.ComicViewModel, error) {
 	var vm viewmodel.ComicViewModel
 	err = db.Model(&model.Comic{}).Where("id = ?", id).Scan(&vm).Error
 	return &vm, err
+}
+func GetComicsByTag(tag_name string, limit int) ([]viewmodel.ComicViewModel, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return nil, err
+	}
+	// Get comics with tags ids
+	var comics_ids []int
+	// distinct
+	err = db.Table("comic_tag_m2m").Select("comic_id").Scan(&comics_ids).Error
+	if err != nil {
+		return nil, err
+	}
+	// Get comics with tags
+	var comics []model.Comic
+	err = db.Model(&model.Comic{}).Preload("Tags").Where("id IN ?", comics_ids).Find(&comics).Error
+	if err != nil {
+		return nil, err
+	}
+	var result []viewmodel.ComicViewModel
+	for _, c := range comics {
+		for _, t := range c.Tags {
+			if t.Name == tag_name {
+				var comic_tags_name []string
+				for _, ct := range c.Tags {
+					comic_tags_name = append(comic_tags_name, ct.Name)
+				}
+
+				result = append(result, viewmodel.ComicViewModel{
+					ID:               int(c.ID),
+					Name:             c.Name,
+					Description:      c.Description,
+					Status:           c.Status,
+					NumberOfEpisodes: c.NumberOfEpisodes,
+					CoverPath:        c.CoverPath,
+					CreatedAt:        c.CreatedAt,
+					TagNames:         comic_tags_name,
+				})
+			}
+		}
+	}
+	return result, nil
 }
 func GetComicEpisodesOrderByEpisodeNumber(comic_id int) ([]viewmodel.EpisodeViewModel, error) {
 	db, err := database.InitializeOrGetDB()
@@ -141,10 +209,42 @@ func GetComicCommentsOrderByDate(comic_id int) ([]viewmodel.ComicCommentViewMode
 	}
 	var vms []viewmodel.ComicCommentViewModel
 	err = db.Model(&model.ComicComment{}).Where("comic_id = ?", comic_id).Order("created_at DESC").Scan(&vms).Error
-	return vms, err
+	if err != nil {
+		return nil, err
+	}
+	for i := range vms {
+		un, err := GetUsernameByID(vms[i].UserID)
+		if err != nil {
+			return nil, err
+		}
+		vms[i].Username = un
+	}
+	return vms, nil
 }
-
-// func IsComicExistsByID(comic_id int) {
-// 	var exists bool
-// 	err = db.Model(&model.User{}).Select("count(*) >0").Where("username = ?", username).Scan(&exists).Error
-// }
+func GetUsernameByID(user_id int) (string, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return "", err
+	}
+	var un string
+	err = db.Model(&model.User{}).Where("id = ?", user_id).Select("username").Scan(&un).Error
+	return un, err
+}
+func IsComicExistsByID(comic_id int) (bool, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return false, err
+	}
+	var exists bool
+	err = db.Model(&model.Comic{}).Select("count(*) >0").Where("id = ?", comic_id).Scan(&exists).Error
+	return exists, err
+}
+func GetComicNameByID(comic_id int) (string, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return "", err
+	}
+	var name string
+	err = db.Model(&model.Comic{}).Where("id = ?", comic_id).Select("name").Scan(&name).Error
+	return name, err
+}

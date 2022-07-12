@@ -10,6 +10,7 @@ type ComicViewModel struct {
 	NumberOfEpisodes int
 	CoverPath        string
 	CreatedAt        time.Time
+	TagNames         []string
 }
 
 type EpisodeViewModel struct {
@@ -35,9 +36,11 @@ type PagingDataViewModel struct {
 	URL             string
 }
 type ComicCommentViewModel struct {
-	Username string
-	Time     *time.Time
-	Dislikes int
-	Likes    int
-	Text     string
+	CommentID int `gorm:"column:comic_id"`
+	UserID    int `gorm:"column:user_id"`
+	Username  string
+	Time      time.Time `gorm:"column:created_at"`
+	Dislikes  int
+	Likes     int
+	Text      string
 }

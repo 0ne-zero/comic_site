@@ -1,4 +1,4 @@
-package middleware
+package controller
 
 import (
 	"fmt"
@@ -8,11 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NotFound() gin.HandlerFunc {
+func SomethingWentWrong(err string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		view_data := gin.H{}
-		view_data["Title"] = fmt.Sprintf("%s | Not Found", constanst.AppName)
-		view_data["Error"] = "This Page not Found"
+		view_data["Title"] = fmt.Sprintf("%s | %s", constanst.AppName, err)
+		view_data["Error"] = err
 		c.HTML(http.StatusNotFound, "error.gohtml", view_data)
 		c.Abort()
 	}

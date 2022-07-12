@@ -1,0 +1,25 @@
+{{define "_tags"}}
+<div class="bg-[#e9eff8] w-full h-14 flex items-center pr-5 pb-3">
+    <div class="pl-4 border-l-2 border-gray-300">
+      <div>
+        <a class="shadow border h-8 bg-white rounded-lg flex items-center py-1 px-3 ">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-4 h-4 text-gray-800 ml-1">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
+            </path>
+          </svg>
+          <div class="text-gray-800 font-semibold text-sm">دسته ها
+          </div>
+        </a>
+      </div>
+    </div>
+    {{range $t := .}}
+        <div style="margin-right:15px">
+            <a href="/searchtag/{{$t}}" class="shadow border h-8 bg-white rounded-lg flex items-center py-1 px-3 ">
+                <div class="text-gray-800 font-semibold text-sm">
+                {{$t}}
+                </div>
+            </a>
+        </div>
+    {{end}}
+</div>
+{{end}}

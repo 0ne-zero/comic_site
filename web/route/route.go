@@ -50,9 +50,10 @@ func MakeRoute() *gin.Engine {
 
 	r.GET("/home", controller.Home_GET)
 	r.GET("/search", controller.Search_GET)
+	r.GET("/searchtag/:tag_name", controller.SearchTag_GET)
 
 	r.GET("/comic/:id", controller.Comic_GET)
-	r.GET("/comments/:id")
+	r.GET("/comments/:id", controller.ComicComments)
 	// Example: /episode/1?ep_number=1
 	// ep_id should be exists otherwise user gets error page as response
 	r.GET("/episode/:comic_id", controller.ShowEpisode)

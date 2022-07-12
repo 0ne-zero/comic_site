@@ -10,21 +10,15 @@ type BasicModel struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
-type Admin struct {
+type User struct {
 	BasicModel
 	Email        string
 	Username     string
 	PasswordHash string
+	IsAdmin      bool
 
-	Comics        []Comic
-	Episodes      []ComicEpisode
-	ComicComments []ComicComment
-}
-type User struct {
-	BasicModel
-	Username     string
-	PasswordHash string
-
+	Comics   []Comic
+	Episodes []ComicEpisode
 	Comments []ComicComment
 }
 type Comic struct {
@@ -36,9 +30,10 @@ type Comic struct {
 	CoverPath        string
 	LastEpisodeTime  *time.Time
 
-	AdminID  int
+	UserID   int
 	Episodes []ComicEpisode
 	Comments []ComicComment
+	Tags     []ComicTag `gorm:"many2many:comic_tag_m2m"`
 }
 type ComicEpisode struct {
 	BasicModel
@@ -47,11 +42,9 @@ type ComicEpisode struct {
 	EpisodeNumber int
 	// Directory of episode's pictures
 	EpisodePath string
-
-	AdminID int
-	ComicID int
+	UserID      int
+	ComicID     int
 }
-
 type ComicComment struct {
 	BasicModel
 	Text     string
@@ -59,6 +52,11 @@ type ComicComment struct {
 	Dislikes int
 
 	UserID  int
-	AdminID int
 	ComicID int
+}
+type ComicTag struct {
+	BasicModel
+	Name string
+
+	Comics []Comic `gorm:"many2many:comic_tag_m2m"`
 }

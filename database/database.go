@@ -67,7 +67,6 @@ func InitializeOrGetDB() (*gorm.DB, error) {
 }
 func MigrateModels(db *gorm.DB) error {
 	return db.AutoMigrate(
-		model.Admin{},
 		model.User{},
 		model.Comic{},
 		model.ComicComment{},
