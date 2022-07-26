@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/0ne-zero/porn_comic_fa/constanst"
-	"github.com/0ne-zero/porn_comic_fa/utilities"
-	"github.com/0ne-zero/porn_comic_fa/web/controller"
-	"github.com/0ne-zero/porn_comic_fa/web/middleware"
+	"github.com/0ne-zero/comic_site/constanst"
+	"github.com/0ne-zero/comic_site/utilities"
+	"github.com/0ne-zero/comic_site/web/controller"
+	"github.com/0ne-zero/comic_site/web/middleware"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
@@ -48,12 +48,13 @@ func MakeRoute() *gin.Engine {
 	r.GET("/register", controller.Register_GET)
 	r.POST("/register", controller.Register_POST)
 
+	r.GET("/", controller.Home_GET)
 	r.GET("/home", controller.Home_GET)
 	r.GET("/search", controller.Search_GET)
 	r.GET("/searchtag/:tag_name", controller.SearchTag_GET)
 
 	r.GET("/comic/:id", controller.Comic_GET)
-	r.GET("/comments/:id", controller.ComicComments)
+	r.GET("/comiccomments/:id", controller.ComicComments)
 	// Example: /episode/1?ep_number=1
 	// ep_id should be exists otherwise user gets error page as response
 	r.GET("/episode/:comic_id", controller.ShowEpisode)

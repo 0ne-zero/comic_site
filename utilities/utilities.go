@@ -13,9 +13,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/0ne-zero/porn_comic_fa/constanst"
-	//db_function "github.com/0ne-zero/porn_comic_fa/database/function"
-	"github.com/0ne-zero/porn_comic_fa/viewmodel"
+	"github.com/0ne-zero/comic_site/constanst"
+	//db_function "github.com/0ne-zero/comic_site/database/function"
+	"github.com/0ne-zero/comic_site/viewmodel"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -77,12 +77,25 @@ func validateSettingData(data map[string]string) error {
 }
 
 func StartMySqlService() bool {
+	// Start mysql.service
 	command := fmt.Sprintf("systemctl start mysql.service")
 	_, err := exec.Command("bash", "-c", command).Output()
 	if err != nil {
+		// mysql.service not found
+		if strings.Contains(strings.ToLower(string(err.(*exec.ExitError).Stderr)), "mysql.service not found") {
+			// Start mysqld.service
+			command := fmt.Sprintf("systemctl start mysqld.service")
+			_, err := exec.Command("bash", "-c", command).Output()
+			if err != nil {
+				return false
+			} else {
+				return true
+			}
+		}
 		return false
+	} else {
+		return true
 	}
-	return true
 }
 
 // Checks is root user that runed the program or not
@@ -101,17 +114,22 @@ func IsUserRoot() bool {
 }
 
 func GetDatabaseNameFromDSN(dsn string) string {
-	before, _, found := strings.Cut(strings.Split(dsn, "/")[1], "?")
-	if !found {
-		return before
+	after_dsn_path := dsn[strings.LastIndex(dsn, "/")+1:]
+	has_parameter := strings.LastIndex(after_dsn_path, "?")
+	if has_parameter == -1 {
+		return after_dsn_path
 	} else {
-		return before
+		return after_dsn_path[:has_parameter]
 	}
 }
 
 func CreateDatabaseFromDSN(dsn string) error {
 	// Create database
-	dsn_without_database := strings.Split(dsn, "/")[0] + "/"
+	dsn_without_database := dsn[:strings.LastIndex(dsn, "/")]
+	// Set slash at end of dsn
+	if string(dsn_without_database[len(dsn_without_database)-1]) != "/" {
+		dsn_without_database = dsn_without_database + "/"
+	}
 	db, err := sql.Open("mysql", dsn_without_database)
 	if err != nil {
 		if !StartMySqlService() {

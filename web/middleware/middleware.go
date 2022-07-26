@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/0ne-zero/porn_comic_fa/constanst"
+	"github.com/0ne-zero/comic_site/constanst"
 	"github.com/gin-gonic/gin"
 )
 

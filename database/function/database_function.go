@@ -1,9 +1,9 @@
 package db_function
 
 import (
-	"github.com/0ne-zero/porn_comic_fa/database"
-	"github.com/0ne-zero/porn_comic_fa/database/model"
-	"github.com/0ne-zero/porn_comic_fa/viewmodel"
+	"github.com/0ne-zero/comic_site/database"
+	"github.com/0ne-zero/comic_site/database/model"
+	"github.com/0ne-zero/comic_site/viewmodel"
 )
 
 func RegisterUser(username, pass_hash string) error {
@@ -95,47 +95,39 @@ func GetComicByID(id int) (*viewmodel.ComicViewModel, error) {
 	err = db.Model(&model.Comic{}).Where("id = ?", id).Scan(&vm).Error
 	return &vm, err
 }
-func GetComicsByTag(tag_name string, limit int) ([]viewmodel.ComicViewModel, error) {
+func GetComicsByTag(tag_id int, limit, offset int) ([]viewmodel.ComicViewModel, error) {
 	db, err := database.InitializeOrGetDB()
 	if err != nil {
 		return nil, err
 	}
-	// Get comics with tags ids
+	// Get comics id that have that tag
 	var comics_ids []int
-	// distinct
-	err = db.Table("comic_tag_m2m").Select("comic_id").Scan(&comics_ids).Error
+	err = db.Table("comic_tag_m2m").Distinct("comic_id").Where("comic_tag_id = ?", tag_id).Order("comic_id").Limit(limit).Offset(offset).Scan(&comics_ids).Error
 	if err != nil {
 		return nil, err
 	}
-	// Get comics with tags
-	var comics []model.Comic
-	err = db.Model(&model.Comic{}).Preload("Tags").Where("id IN ?", comics_ids).Find(&comics).Error
+	// Get comics
+	var comics []viewmodel.ComicViewModel
+	err = db.Model(&model.Comic{}).Where("id IN ?", comics_ids).Scan(&comics).Error
+	return comics, err
+}
+func GetComicsCountWithTagID(tag_id int) (int, error) {
+	db, err := database.InitializeOrGetDB()
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	var result []viewmodel.ComicViewModel
-	for _, c := range comics {
-		for _, t := range c.Tags {
-			if t.Name == tag_name {
-				var comic_tags_name []string
-				for _, ct := range c.Tags {
-					comic_tags_name = append(comic_tags_name, ct.Name)
-				}
-
-				result = append(result, viewmodel.ComicViewModel{
-					ID:               int(c.ID),
-					Name:             c.Name,
-					Description:      c.Description,
-					Status:           c.Status,
-					NumberOfEpisodes: c.NumberOfEpisodes,
-					CoverPath:        c.CoverPath,
-					CreatedAt:        c.CreatedAt,
-					TagNames:         comic_tags_name,
-				})
-			}
-		}
+	var count int64
+	err = db.Table("comic_tag_m2m").Where("comic_tag_id = ?", tag_id).Count(&count).Error
+	return int(count), err
+}
+func GetTagIDByName(tag_name string) (int, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return 0, err
 	}
-	return result, nil
+	var id int
+	err = db.Model(&model.ComicTag{}).Select("id").Where("name = ?", tag_name).Scan(&id).Error
+	return id, err
 }
 func GetComicEpisodesOrderByEpisodeNumber(comic_id int) ([]viewmodel.EpisodeViewModel, error) {
 	db, err := database.InitializeOrGetDB()

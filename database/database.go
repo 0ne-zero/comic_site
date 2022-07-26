@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/0ne-zero/porn_comic_fa/database/model"
-	"github.com/0ne-zero/porn_comic_fa/utilities"
+	"github.com/0ne-zero/comic_site/database/model"
+	"github.com/0ne-zero/comic_site/utilities"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -59,6 +59,7 @@ func InitializeOrGetDB() (*gorm.DB, error) {
 			// We don't need to try again to connect to database because we are connected
 			try_again = false
 		}
+		fmt.Println("We are connected to database")
 		db.Set("gorm:auto_preload", true)
 		return db, nil
 	} else {
@@ -108,4 +109,61 @@ func ConnectToDatabaseANDHandleErrors() *gorm.DB {
 	}
 
 	return db
+}
+
+func CreateTempData(db *gorm.DB) {
+	db.Create(&model.User{Username: "aaa", Email: "aaaa", PasswordHash: "sadfsd2rs", IsAdmin: true})
+	db.Create(&model.User{Username: "bbb", Email: "aaaa", PasswordHash: "sadfsd2rs", IsAdmin: false})
+	db.Create(&model.User{Username: "ccc", Email: "aaaa", PasswordHash: "sadfsd2rs", IsAdmin: false})
+	db.Create(&model.User{Username: "ddd", Email: "aaaa", PasswordHash: "sadfsd2rs", IsAdmin: false})
+
+	t := time.Now()
+	a := model.ComicTag{Name: "aaa", Comics: []*model.Comic{&model.Comic{UserID: 1, Name: "bbb", Description: "aaa", Status: "aaa", NumberOfEpisodes: 4423, CoverPath: "adfsd", LastEpisodeTime: &t}}}
+	b := model.ComicTag{Name: "bbb", Comics: []*model.Comic{&model.Comic{UserID: 1, Name: "ccc", Description: "aaa", Status: "aaa", NumberOfEpisodes: 4423, CoverPath: "adfsd", LastEpisodeTime: &t}}}
+	c := model.ComicTag{Name: "ccc", Comics: []*model.Comic{&model.Comic{UserID: 1, Name: "ddd", Description: "aaa", Status: "aaa", NumberOfEpisodes: 4423, CoverPath: "adfsd", LastEpisodeTime: &t}}}
+	d := model.ComicTag{Name: "ddd", Comics: []*model.Comic{&model.Comic{UserID: 1, Name: "eee", Description: "aaa", Status: "aaa", NumberOfEpisodes: 4423, CoverPath: "adfsd", LastEpisodeTime: &t}}}
+	e := model.ComicTag{Name: "eee", Comics: []*model.Comic{&model.Comic{UserID: 1, Name: "aaa", Description: "aaa", Status: "aaa", NumberOfEpisodes: 4423, CoverPath: "adfsd", LastEpisodeTime: &t}}}
+	db.Create(&a)
+	db.Create(&b)
+	db.Create(&c)
+	db.Create(&d)
+	db.Create(&e)
+
+	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 1})
+	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 2})
+	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 1})
+	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 3})
+	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 3})
+	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 3})
+	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 2})
+	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 4})
+	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 2})
+	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 2})
+
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
+	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
 }

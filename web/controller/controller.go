@@ -8,21 +8,21 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/0ne-zero/porn_comic_fa/constanst"
-	"github.com/0ne-zero/porn_comic_fa/web/middleware"
+	"github.com/0ne-zero/comic_site/constanst"
+	"github.com/0ne-zero/comic_site/web/middleware"
 
-	db_function "github.com/0ne-zero/porn_comic_fa/database/function"
-	"github.com/0ne-zero/porn_comic_fa/utilities"
-	"github.com/0ne-zero/porn_comic_fa/viewmodel"
+	db_function "github.com/0ne-zero/comic_site/database/function"
+	"github.com/0ne-zero/comic_site/utilities"
+	"github.com/0ne-zero/comic_site/viewmodel"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
-// Comic comments, comic tags
-// show user is logged or not
+// database connectivity
 func Login_GET(c *gin.Context) {
 	c.HTML(200, "login.gohtml", map[string]any{
-		"Title": constanst.StaticTitle + "ورود",
+		"Title":    constanst.StaticTitle + "ورود",
+		"IsLogged": isLogged(c),
 	})
 }
 func Login_POST(c *gin.Context) {
@@ -33,6 +33,7 @@ func Login_POST(c *gin.Context) {
 		view_data := map[string]any{
 			"UsernameError": "نام کاربری رو پر کن",
 			"PassError":     "رمز عبور رو پر کن",
+			"IsLogged":      isLogged(c),
 		}
 		c.HTML(442, "login.gohtml", view_data)
 		return
@@ -41,6 +42,7 @@ func Login_POST(c *gin.Context) {
 	if err != nil {
 		view_data := map[string]any{
 			"PassError": constanst.SomethingWentWrongError,
+			"IsLogged":  isLogged(c),
 		}
 		c.HTML(442, "login.gohtml", view_data)
 		return
@@ -50,6 +52,7 @@ func Login_POST(c *gin.Context) {
 		// Error occurred
 		view_data := map[string]any{
 			"PassError": constanst.SomethingWentWrongError,
+			"IsLogged":  isLogged(c),
 		}
 		c.HTML(442, "login.gohtml", view_data)
 		return
@@ -57,6 +60,7 @@ func Login_POST(c *gin.Context) {
 		// User isn't exists in database
 		view_data := map[string]any{
 			"PassError": "نام کاریری یا رمز عبور اشتباه هست",
+			"IsLogged":  isLogged(c),
 		}
 		c.HTML(442, "login.gohtml", view_data)
 		return
@@ -66,6 +70,7 @@ func Login_POST(c *gin.Context) {
 	if err != nil {
 		view_data := map[string]any{
 			"PassError": constanst.SomethingWentWrongError,
+			"IsLogged":  isLogged(c),
 		}
 		c.HTML(442, "login.gohtml", view_data)
 		return
@@ -78,7 +83,8 @@ func Login_POST(c *gin.Context) {
 }
 func Register_GET(c *gin.Context) {
 	c.HTML(200, "register.gohtml", map[string]any{
-		"Title": constanst.StaticTitle + "ثبت نام",
+		"Title":    constanst.StaticTitle + "ثبت نام",
+		"IsLogged": isLogged(c),
 	})
 }
 func Register_POST(c *gin.Context) {
@@ -90,6 +96,7 @@ func Register_POST(c *gin.Context) {
 			"Title":         constanst.StaticTitle + "ثبت نام",
 			"UsernameError": "نام کاربری رو پر کن",
 			"PassError":     "رمز عبور رو پر کن",
+			"IsLogged":      isLogged(c),
 		}
 		c.HTML(442, "register.gohtml", view_data)
 		return
@@ -98,6 +105,7 @@ func Register_POST(c *gin.Context) {
 		view_data := map[string]any{
 			"Title":     constanst.StaticTitle + "ثبت نام",
 			"PassError": constanst.SomethingWentWrongError,
+			"IsLogged":  isLogged(c),
 		}
 		c.HTML(442, "register.gohtml", view_data)
 		return
@@ -106,6 +114,7 @@ func Register_POST(c *gin.Context) {
 		view_data := map[string]any{
 			"Title":         constanst.StaticTitle + "ثبت نام",
 			"UsernameError": "نام کاربری وجود داره, نام دیگری انتخاب کن",
+			"IsLogged":      isLogged(c),
 		}
 		c.HTML(442, "register.gohtml", view_data)
 		return
@@ -115,6 +124,7 @@ func Register_POST(c *gin.Context) {
 		view_data := map[string]any{
 			"Title":     constanst.StaticTitle + "ثبت نام",
 			"PassError": constanst.SomethingWentWrongError,
+			"IsLogged":  isLogged(c),
 		}
 		c.HTML(442, "register.gohtml", view_data)
 		return
@@ -125,6 +135,7 @@ func Register_POST(c *gin.Context) {
 		view_data := map[string]any{
 			"Title":     constanst.StaticTitle + "ثبت نام",
 			"PassError": constanst.SomethingWentWrongError,
+			"IsLogged":  isLogged(c),
 		}
 		c.HTML(442, "register.gohtml", view_data)
 		return
@@ -155,7 +166,7 @@ func Home_GET(c *gin.Context) {
 	// Get latest comics
 	latest_comics, err := db_function.GetComicOrderByUpdate(10, offset)
 	view_data := map[string]any{
-		"UserID": sessions.Default(c).Get("UserID"),
+		"IsLogged": isLogged(c),
 	}
 	tags, err := db_function.GetTagsWithLimit(6)
 	view_data["PagingData"] = paging_data
@@ -199,7 +210,8 @@ func Search_GET(c *gin.Context) {
 		// User doesn't sent searched_query
 	} else {
 		view_data := map[string]any{
-			"Title": constanst.StaticTitle + "جستجو",
+			"Title":    constanst.StaticTitle + "جستجو",
+			"IsLogged": isLogged(c),
 		}
 		c.HTML(200, "search.gohtml", view_data)
 	}
@@ -212,15 +224,39 @@ func SearchTag_GET(c *gin.Context) {
 	}
 	exists, err := db_function.IsTagExistsByName(tag_name)
 	if err != nil {
-
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
 	}
 	if !exists {
-
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
 	}
-	comics, err := db_function.GetComicsByTag(tag_name, 10)
+	tag_id, err := db_function.GetTagIDByName(tag_name)
+	// Get page from url
+	selected_page := utilities.GetSelectedPageFromURL(c)
+	// Get offset from selected_page
+	offset := utilities.GetOffsetFromSelectedPage(selected_page)
+
+	comics, err := db_function.GetComicsByTag(tag_id, 10, offset)
 	if err != nil {
-
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
 	}
+	// Get paging data for show to user
+	comics_count, err := db_function.GetComicsCountWithTagID(tag_id)
+	paging_data, err := utilities.GetPagingDataForSearch(selected_page, comics_count)
+	paging_data.URL = fmt.Sprintf("/searchtag/%s?", tag_name)
+	print(comics)
+	view_data := map[string]any{
+		"Title":    constanst.StaticTitle + "جستجو در تگ ها",
+		"IsLogged": isLogged(c),
+	}
+	// Send comics to template if comics isn't nil, otherwise do nothing
+	if view_data["Comics"] = comics; comics != nil {
+	}
+	if view_data["PagingData"] = paging_data; paging_data != nil {
+	}
+	c.HTML(200, "search_tag.gohtml", view_data)
 
 }
 func Comic_GET(c *gin.Context) {
@@ -249,10 +285,12 @@ func Comic_GET(c *gin.Context) {
 	episode_index_data := map[string]any{
 		"ComicID":  comic.ID,
 		"Episodes": episodes,
+		"IsLogged": isLogged(c),
 	}
 	view_data := map[string]any{
 		"Comic":            comic,
 		"EpisodeIndexData": episode_index_data,
+		"IsLogged":         isLogged(c),
 	}
 	c.HTML(200, "comic.gohtml", view_data)
 }
@@ -340,6 +378,7 @@ func ShowEpisode(c *gin.Context) {
 			"Title":       fmt.Sprintf("%s--%s %d", episode_info.ComicName, episode_info.Name, ep_number_int),
 			"PicsPath":    fine_pictures_path,
 			"NextEpisode": next_ep,
+			"IsLogged":    isLogged(c),
 		}
 		c.HTML(200, "show_episode.gohtml", view_data)
 		// There isn't next episode
@@ -347,6 +386,7 @@ func ShowEpisode(c *gin.Context) {
 		view_data := map[string]any{
 			"Title":    fmt.Sprintf("%s--%s %d", episode_info.ComicName, episode_info.Name, ep_number_int),
 			"PicsPath": fine_pictures_path,
+			"IsLogged": isLogged(c),
 		}
 		c.HTML(200, "show_episode.gohtml", view_data)
 		return
@@ -385,6 +425,18 @@ func ComicComments(c *gin.Context) {
 	view_data := map[string]any{
 		"Title":    fmt.Sprintf("نظرات کمیک %s", comic_name),
 		"Comments": comments,
+		"IsLogged": isLogged(c),
 	}
 	c.HTML(200, "comic_comments.gohtml", view_data)
+}
+
+func isLogged(c *gin.Context) bool {
+	user_id, ok := sessions.Default(c).Get("UserID").(int)
+	if !ok {
+		return false
+	}
+	if user_id < 1 {
+		return false
+	}
+	return true
 }

@@ -33,7 +33,7 @@ type Comic struct {
 	UserID   int
 	Episodes []ComicEpisode
 	Comments []ComicComment
-	Tags     []ComicTag `gorm:"many2many:comic_tag_m2m"`
+	Tags     []*ComicTag `gorm:"many2many:comic_tag_m2m"`
 }
 type ComicEpisode struct {
 	BasicModel
@@ -58,5 +58,5 @@ type ComicTag struct {
 	BasicModel
 	Name string
 
-	Comics []Comic `gorm:"many2many:comic_tag_m2m"`
+	Comics []*Comic `gorm:"many2many:comic_tag_m2m"`
 }
