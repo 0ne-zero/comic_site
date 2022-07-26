@@ -25,10 +25,17 @@ func main() {
 		fmt.Println(fmt.Sprintf("We can't read setting file\nError: %s", err.Error()))
 	}
 
-	db := database.ConnectToDatabaseANDHandleErrors()
+	// Connect to database
+	is_connected := database.ConnectToDatabaseANDHandleErrors()
 	// If db is nil we kill the program, because we can't continue without database
-	if db == nil {
+	if is_connected == false {
 		fmt.Println("We really cannot connect to the database")
+		os.Exit(1)
+	}
+	// Get database
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		fmt.Println("We had trouble to get database")
 		os.Exit(1)
 	}
 	err = database.MigrateModels(db)

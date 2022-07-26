@@ -26,7 +26,6 @@ func InitializeOrGetDB() (*gorm.DB, error) {
 		}
 
 		// Open connection to database
-		var db *gorm.DB
 		try_again := true
 		for try_again {
 			// Connect to database with gorm
@@ -76,14 +75,20 @@ func MigrateModels(db *gorm.DB) error {
 }
 
 // Tries to connect to the database and handle errors if any occurred
-// Returns *gorm.DB. if it was nil means we cannot connect to database and also it can't be handled
-func ConnectToDatabaseANDHandleErrors() *gorm.DB {
-	var db *gorm.DB
+func ConnectToDatabaseANDHandleErrors() bool {
 	var err error
 	// Try again to connect to database
 	var try_again bool = true
 
+	// Max try to connect, for prevent infinit loop
+	var max_try int = 20
+	var try_count int = 0
 	for try_again {
+		// Break infinit loop
+		if try_count == max_try {
+			return false
+		}
+
 		db, err = InitializeOrGetDB()
 		try_again = false
 		if err != nil {
@@ -96,9 +101,9 @@ func ConnectToDatabaseANDHandleErrors() *gorm.DB {
 					if tcp_addr.Port == 3306 {
 						// Try to start mysql service
 						res := utilities.StartMySqlService()
-						if try_again = true; res == false {
+						if !res {
+							try_again = true
 						}
-
 					}
 				}
 			default:
@@ -106,11 +111,10 @@ func ConnectToDatabaseANDHandleErrors() *gorm.DB {
 				os.Exit(1)
 			}
 		}
+		try_count += 1
 	}
-
-	return db
+	return true
 }
-
 func CreateTempData(db *gorm.DB) {
 	db.Create(&model.User{Username: "aaa", Email: "aaaa", PasswordHash: "sadfsd2rs", IsAdmin: true})
 	db.Create(&model.User{Username: "bbb", Email: "aaaa", PasswordHash: "sadfsd2rs", IsAdmin: false})
