@@ -5,7 +5,7 @@
 
 ## Screenshot
 - A general view
-
+- <img src="https://github.com/0ne-zero/comic_site/blob/main/screenshot/ScreenShot.png" width=80% height=80%>
 
 ## Technologies Used
 - Go v1.18
