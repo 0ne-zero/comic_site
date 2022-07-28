@@ -1,6 +1,6 @@
 {
     "APP_NAME":"Comic_fa",
-    "DSN":"me:@/Fucky9909@tcp(127.0.0.1:3306)/porn_comic_fa?parseTime=true",
+    "DSN":"username:password@tcp(127.0.0.1:3306)/comic_fa?parseTime=true",
     "HASH_COST_NUMBER":"8",
     "CONTACT_EMAIL":"nothing@pro.com"
 }

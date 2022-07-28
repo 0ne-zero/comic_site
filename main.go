@@ -12,9 +12,10 @@ import (
 
 // Test all site functionality
 func main() {
+	fmt.Println("This program needs MySQL,after you install MySQL fill DSN field in setting.json")
 	if !utilities.IsUserRoot() {
 		fmt.Println("Only root user can run this program (:\nProbably you forgot to use 'sudo' command")
-		//os.Exit(1)
+		os.Exit(1)
 	}
 	var err error
 	// Get executable directory path
