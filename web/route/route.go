@@ -42,11 +42,6 @@ func MakeRoute() *gin.Engine {
 	store.Options(sessions.Options{MaxAge: 0})
 	r.Use(sessions.Sessions(constanst.AppName+"_SESSION_KEY", store))
 
-	r.Use(func(ctx *gin.Context) {
-		s := sessions.Default(ctx)
-		s.Set("UserID", 5)
-		s.Save()
-	})
 	// Public routes
 	r.GET("/login", controller.Login_GET)
 	r.POST("/login", controller.Login_POST)
