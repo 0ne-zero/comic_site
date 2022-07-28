@@ -1,6 +1,7 @@
 # Comic Website
 ## General Information
 - A simple comic website written in Go
+- I don't have credit for front-end of site
 
 ## Screenshot
 - A general view
