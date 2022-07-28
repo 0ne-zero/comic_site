@@ -10,6 +10,7 @@ import (
 	"github.com/0ne-zero/comic_site/web/route"
 )
 
+// Test all site functionality
 func main() {
 	if !utilities.IsUserRoot() {
 		fmt.Println("Only root user can run this program (:\nProbably you forgot to use 'sudo' command")

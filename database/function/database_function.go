@@ -154,8 +154,8 @@ func GetEpisodeByComicIDANDEpisodeID(comic_id, episode_number int) (*viewmodel.E
 		return nil, err
 	}
 	vm.ComicName = comic_name
+	vm.ComicID = comic_id
 	return &vm, err
-
 }
 func GetLastEpisodeNumberOfComic(comic_id int) (int, error) {
 	db, err := database.InitializeOrGetDB()
@@ -163,7 +163,7 @@ func GetLastEpisodeNumberOfComic(comic_id int) (int, error) {
 		return 0, err
 	}
 	var last_number int
-	err = db.Model(&model.ComicEpisode{}).Select("episode_number").Where("comic_id = ?", comic_id).Order("episode_number DESC").Limit(1).Scan(&last_number).Error
+	err = db.Model(&model.Comic{}).Select("number_of_episodes").Where("id = ?", comic_id).Scan(&last_number).Error
 	return last_number, err
 }
 
@@ -204,6 +204,7 @@ func GetComicCommentsOrderByDate(comic_id int) ([]viewmodel.ComicCommentViewMode
 	if err != nil {
 		return nil, err
 	}
+	// Get comments username
 	for i := range vms {
 		un, err := GetUsernameByID(vms[i].UserID)
 		if err != nil {
@@ -211,7 +212,38 @@ func GetComicCommentsOrderByDate(comic_id int) ([]viewmodel.ComicCommentViewMode
 		}
 		vms[i].Username = un
 	}
+	// Get comments likes and dislikes
+	for i := range vms {
+		likes, err := GetCommentLikesCount(vms[i].ID)
+		if err != nil {
+			return nil, err
+		}
+		vms[i].Likes = likes
+		dislikes, err := GetCommentDislikesCount(vms[i].ID)
+		if err != nil {
+			return nil, err
+		}
+		vms[i].Dislikes = dislikes
+	}
 	return vms, nil
+}
+func GetCommentLikesCount(comment_id int) (int, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return 0, err
+	}
+	var c int64
+	err = db.Model(&model.ComicCommentLike{}).Where("comic_comment_id = ?", comment_id).Count(&c).Error
+	return int(c), err
+}
+func GetCommentDislikesCount(comment_id int) (int, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return 0, err
+	}
+	var c int64
+	err = db.Model(&model.ComicCommentDislike{}).Where("comic_comment_id = ?", comment_id).Count(&c).Error
+	return int(c), err
 }
 func GetUsernameByID(user_id int) (string, error) {
 	db, err := database.InitializeOrGetDB()
@@ -230,6 +262,75 @@ func IsComicExistsByID(comic_id int) (bool, error) {
 	var exists bool
 	err = db.Model(&model.Comic{}).Select("count(*) >0").Where("id = ?", comic_id).Scan(&exists).Error
 	return exists, err
+}
+
+// Returns "liked" if user already liked the comment
+// Returns "disliked" if user already disliked the comment
+// Returns "" if user didn't do anything
+func IsUserLikedORDislikedComment(user_id, comment_id int) (string, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return "error", err
+	}
+	var is_liked bool
+	err = db.Model(&model.ComicCommentLike{}).Select("count(*) > 0").Where("user_id = ? AND comic_comment_id = ?", user_id, comment_id).Scan(&is_liked).Error
+	if err != nil {
+		return "error", err
+	}
+	if is_liked {
+		return "liked", nil
+	}
+	var is_disliked bool
+	err = db.Model(&model.ComicCommentDislike{}).Select("count(*) > 0").Where("user_id = ? AND comic_comment_id = ?", user_id, comment_id).Scan(&is_disliked).Error
+	if err != nil {
+		return "error", err
+	}
+	if is_disliked {
+		return "disliked", nil
+	}
+	// User didn't do anything, nor like or dislike
+	return "", nil
+}
+func RemoveCommentLike(comment_id, user_id int) error {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return err
+	}
+	err = db.Unscoped().Where("user_id = ? AND comic_comment_id = ?", user_id, comment_id).Delete(&model.ComicCommentLike{}).Error
+	return err
+}
+func RemoveCommentDislike(comment_id, user_id int) error {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return err
+	}
+	err = db.Unscoped().Where("user_id = ? AND comic_comment_id = ?", user_id, comment_id).Delete(&model.ComicCommentDislike{}).Error
+	return err
+}
+func LikingComment(user_id, comment_id int) error {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return err
+	}
+	err = db.Create(&model.ComicCommentLike{UserID: user_id, ComicCommentID: comment_id}).Error
+	return err
+}
+func DislikingComment(user_id, comment_id int) error {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return err
+	}
+	err = db.Create(&model.ComicCommentDislike{UserID: user_id, ComicCommentID: comment_id}).Error
+	return err
+}
+func GetComicIDByCommentID(c_id int) (int, error) {
+	db, err := database.InitializeOrGetDB()
+	if err != nil {
+		return 0, err
+	}
+	var comic_id int
+	err = db.Model(&model.ComicComment{}).Where("id = ?", c_id).Select("comic_id").Scan(&comic_id).Error
+	return comic_id, err
 }
 func GetComicNameByID(comic_id int) (string, error) {
 	db, err := database.InitializeOrGetDB()

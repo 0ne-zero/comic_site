@@ -18,7 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// database connectivity
+// fix comic comment page shits
 func Login_GET(c *gin.Context) {
 	c.HTML(200, "login.gohtml", map[string]any{
 		"Title":    constanst.StaticTitle + "ورود",
@@ -80,6 +80,7 @@ func Login_POST(c *gin.Context) {
 	s := sessions.Default(c)
 	s.Set("UserID", user_id)
 	s.Save()
+	c.Redirect(http.StatusMovedPermanently, "/")
 }
 func Register_GET(c *gin.Context) {
 	c.HTML(200, "register.gohtml", map[string]any{
@@ -270,6 +271,15 @@ func Comic_GET(c *gin.Context) {
 		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
 		return
 	}
+	exists, err := db_function.IsComicExistsByID(int(comic_id_int))
+	if err != nil {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	if !exists {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
 	comic, err := db_function.GetComicByID(int(comic_id_int))
 	if err != nil {
 		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
@@ -316,7 +326,8 @@ func ShowEpisode(c *gin.Context) {
 		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
 		return
 	}
-
+	// Remove slash from begin of episode path if exists
+	episode_info.EpisodePath = strings.TrimPrefix(episode_info.EpisodePath, "/")
 	// Is Episode path a directory ?
 	is_dir, err := utilities.IsDirectory(episode_info.EpisodePath)
 	if err != nil {
@@ -409,7 +420,7 @@ func ComicComments(c *gin.Context) {
 		return
 	}
 
-	comic_name, err := db_function.GetComicNameByID(comic_id)
+	comic, err := db_function.GetComicByID(comic_id)
 	if err != nil {
 		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
 		return
@@ -423,11 +434,143 @@ func ComicComments(c *gin.Context) {
 	}
 
 	view_data := map[string]any{
-		"Title":    fmt.Sprintf("نظرات کمیک %s", comic_name),
+		"Title":    fmt.Sprintf("نظرات کمیک %s", comic.Name),
+		"Comic":    comic,
 		"Comments": comments,
 		"IsLogged": isLogged(c),
 	}
 	c.HTML(200, "comic_comments.gohtml", view_data)
+}
+func LikingComment(c *gin.Context) {
+	c_id, err := strconv.Atoi(c.Param("c_id"))
+	if err != nil {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	if c_id < 1 {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+
+	user_id, ok := sessions.Default(c).Get("UserID").(int)
+	if !ok {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	if user_id < 1 {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+
+	status, err := db_function.IsUserLikedORDislikedComment(user_id, c_id)
+	if err != nil {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	if status == "disliked" {
+		// Delete dislike and like comment
+		err = db_function.RemoveCommentDislike(c_id, user_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		err = db_function.LikingComment(user_id, c_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		comic_id, err := db_function.GetComicIDByCommentID(c_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/comiccomments/%d", comic_id))
+	} else if status == "liked" {
+		comic_id, err := db_function.GetComicIDByCommentID(c_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/comiccomments/%d", comic_id))
+	} else if status == "" {
+		err = db_function.LikingComment(user_id, c_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		comic_id, err := db_function.GetComicIDByCommentID(c_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/comiccomments/%d", comic_id))
+	}
+
+}
+func DislikingComment(c *gin.Context) {
+	c_id, err := strconv.Atoi(c.Param("c_id"))
+	if err != nil {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	if c_id < 1 {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+
+	user_id, ok := sessions.Default(c).Get("UserID").(int)
+	if !ok {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	if user_id < 1 {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+
+	status, err := db_function.IsUserLikedORDislikedComment(user_id, c_id)
+	if err != nil {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	if status == "liked" {
+		// Delete like and dislike comment
+		err = db_function.RemoveCommentLike(c_id, user_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		err = db_function.DislikingComment(user_id, c_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		comic_id, err := db_function.GetComicIDByCommentID(c_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/comiccomments/%d", comic_id))
+	} else if status == "disliked" {
+		comic_id, err := db_function.GetComicIDByCommentID(c_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/comiccomments/%d", comic_id))
+	} else if status == "" {
+		err = db_function.DislikingComment(user_id, c_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		comic_id, err := db_function.GetComicIDByCommentID(c_id)
+		if err != nil {
+			SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+			return
+		}
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/comiccomments/%d", comic_id))
+	}
 }
 
 func isLogged(c *gin.Context) bool {

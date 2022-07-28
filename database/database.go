@@ -71,6 +71,8 @@ func MigrateModels(db *gorm.DB) error {
 		model.Comic{},
 		model.ComicComment{},
 		model.ComicEpisode{},
+		model.ComicCommentLike{},
+		model.ComicCommentDislike{},
 	)
 }
 
@@ -116,58 +118,22 @@ func ConnectToDatabaseANDHandleErrors() bool {
 	return true
 }
 func CreateTempData(db *gorm.DB) {
-	db.Create(&model.User{Username: "aaa", Email: "aaaa", PasswordHash: "sadfsd2rs", IsAdmin: true})
-	db.Create(&model.User{Username: "bbb", Email: "aaaa", PasswordHash: "sadfsd2rs", IsAdmin: false})
-	db.Create(&model.User{Username: "ccc", Email: "aaaa", PasswordHash: "sadfsd2rs", IsAdmin: false})
-	db.Create(&model.User{Username: "ddd", Email: "aaaa", PasswordHash: "sadfsd2rs", IsAdmin: false})
+	db.Create(&model.User{Username: "admin", Email: "admin", PasswordHash: " $2a$08$644UU94RPpGoEfLKuH5XWO1dRVhOITnFpjBHK0NszUuEFKKCzfWGG ", IsAdmin: true})
+	db.Create(&model.User{Username: "regular", Email: "regular", PasswordHash: " $2a$08$644UU94RPpGoEfLKuH5XWO1dRVhOITnFpjBHK0NszUuEFKKCzfWGG ", IsAdmin: true})
 
 	t := time.Now()
-	a := model.ComicTag{Name: "aaa", Comics: []*model.Comic{&model.Comic{UserID: 1, Name: "bbb", Description: "aaa", Status: "aaa", NumberOfEpisodes: 4423, CoverPath: "adfsd", LastEpisodeTime: &t}}}
-	b := model.ComicTag{Name: "bbb", Comics: []*model.Comic{&model.Comic{UserID: 1, Name: "ccc", Description: "aaa", Status: "aaa", NumberOfEpisodes: 4423, CoverPath: "adfsd", LastEpisodeTime: &t}}}
-	c := model.ComicTag{Name: "ccc", Comics: []*model.Comic{&model.Comic{UserID: 1, Name: "ddd", Description: "aaa", Status: "aaa", NumberOfEpisodes: 4423, CoverPath: "adfsd", LastEpisodeTime: &t}}}
-	d := model.ComicTag{Name: "ddd", Comics: []*model.Comic{&model.Comic{UserID: 1, Name: "eee", Description: "aaa", Status: "aaa", NumberOfEpisodes: 4423, CoverPath: "adfsd", LastEpisodeTime: &t}}}
-	e := model.ComicTag{Name: "eee", Comics: []*model.Comic{&model.Comic{UserID: 1, Name: "aaa", Description: "aaa", Status: "aaa", NumberOfEpisodes: 4423, CoverPath: "adfsd", LastEpisodeTime: &t}}}
-	db.Create(&a)
-	db.Create(&b)
-	db.Create(&c)
-	db.Create(&d)
-	db.Create(&e)
+	tag := model.ComicTag{Name: "action"}
+	db.Create(&tag)
+	comic := model.Comic{Name: "کمیک Wolfenstein", Description: "یک مشت نازی با کمیک جدید از دنیای یکی از پرفروش ترین بازی های دنیا یعنی ولفن اشتاین، نوشته شده توسط دن واترز، مستقیمتا وارد دنیای ولفن اشتاین بشین، دنیای که نازی ها به کمک ماشین های کشتار فوق پیشرفته جنگ رو پیروز شده اند. بلازکوویچ برای مقابله با نازی ها به این کمیک برمیگرده، اقتباس شده از فرانچایز محبوب بازی ها. بلازکوویچ میتونه جلوی این ربات های فوق پیشرفته و ماشین های کشتار رو بگیره؟اگه طرفدار بازی جذاب ولفنشتاین هستید به هیچ وجه این کمیک دو قسمتی کوتاه رو از دست ندید.", Status: "در حال پخش", NumberOfEpisodes: 2, LastEpisodeTime: &t, UserID: 1, CoverPath: "/statics/comic/wolfenstein/wolfenstein.jpg"}
+	db.Create(&comic)
 
-	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 1})
-	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 2})
-	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 1})
-	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 3})
-	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 3})
-	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 3})
-	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 2})
-	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 4})
-	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 2})
-	db.Create(&model.ComicComment{Text: "adfsfsad", Likes: 234, Dislikes: 2425252324542, UserID: 2, ComicID: 2})
+	likes := []*model.ComicCommentLike{{UserID: 1, ComicCommentID: 1}, {UserID: 1, ComicCommentID: 2}, {UserID: 1, ComicCommentID: 3}}
+	dislikes := []*model.ComicCommentDislike{{UserID: 1, ComicCommentID: 4}, {UserID: 2, ComicCommentID: 1}}
+	db.Create(likes)
+	db.Create(dislikes)
 
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 1})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 2})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 3})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
-	db.Create(&model.ComicEpisode{Name: "dsjfkadl", CoverPath: "adfkjls", EpisodeNumber: 233, EpisodePath: "dkfl;s", UserID: 1, ComicID: 4})
+	db.Create(&model.ComicComment{Text: "خوب عالی", UserID: 1, ComicID: 1})
+	db.Create(&model.ComicComment{Text: "کثافت", UserID: 1, ComicID: 1})
+	db.Create(&model.ComicEpisode{Name: "one", CoverPath: "/statics/comic/wolfenstein/wolfenstein.jpg", EpisodeNumber: 1, EpisodePath: "/statics/comic/wolfenstein/ep-01/", UserID: 1, ComicID: 1})
+	db.Create(&model.ComicEpisode{Name: "two", CoverPath: "/statics/comic/wolfenstein/wolfenstein.jpg", EpisodeNumber: 2, EpisodePath: "/statics/comic/wolfenstein/ep-02/", UserID: 1, ComicID: 1})
 }

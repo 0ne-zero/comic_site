@@ -42,6 +42,11 @@ func MakeRoute() *gin.Engine {
 	store.Options(sessions.Options{MaxAge: 0})
 	r.Use(sessions.Sessions(constanst.AppName+"_SESSION_KEY", store))
 
+	r.Use(func(ctx *gin.Context) {
+		s := sessions.Default(ctx)
+		s.Set("UserID", 5)
+		s.Save()
+	})
 	// Public routes
 	r.GET("/login", controller.Login_GET)
 	r.POST("/login", controller.Login_POST)
@@ -55,6 +60,9 @@ func MakeRoute() *gin.Engine {
 
 	r.GET("/comic/:id", controller.Comic_GET)
 	r.GET("/comiccomments/:id", controller.ComicComments)
+	// Comment liking
+	r.GET("/liking/:c_id", controller.LikingComment)
+	r.GET("/disliking/:c_id", controller.DislikingComment)
 	// Example: /episode/1?ep_number=1
 	// ep_id should be exists otherwise user gets error page as response
 	r.GET("/episode/:comic_id", controller.ShowEpisode)

@@ -17,9 +17,11 @@ type User struct {
 	PasswordHash string
 	IsAdmin      bool
 
-	Comics   []Comic
-	Episodes []ComicEpisode
-	Comments []ComicComment
+	Comics          []Comic
+	Episodes        []ComicEpisode
+	Comments        []ComicComment
+	CommentLikes    []ComicCommentLike
+	CommentDislikes []ComicCommentDislike
 }
 type Comic struct {
 	BasicModel
@@ -47,12 +49,22 @@ type ComicEpisode struct {
 }
 type ComicComment struct {
 	BasicModel
-	Text     string
-	Likes    int
-	Dislikes int
+	Text string
 
-	UserID  int
-	ComicID int
+	UserID   int
+	ComicID  int
+	Likes    []*ComicCommentLike
+	Dislikes []*ComicCommentDislike
+}
+type ComicCommentLike struct {
+	BasicModel
+	UserID         int
+	ComicCommentID int
+}
+type ComicCommentDislike struct {
+	BasicModel
+	UserID         int
+	ComicCommentID int
 }
 type ComicTag struct {
 	BasicModel

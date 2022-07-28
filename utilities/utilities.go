@@ -1,7 +1,9 @@
 package utilities
 
 import (
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,7 +19,6 @@ import (
 	//db_function "github.com/0ne-zero/comic_site/database/function"
 	"github.com/0ne-zero/comic_site/viewmodel"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func ReadFieldsInSettingFile(fields_name []string) (map[string]string, error) {
@@ -150,25 +151,22 @@ func GetExecutableDirectory() string {
 	return filepath.Dir(os.Args[0])
 }
 func HashPassword(pass string) (string, error) {
-	// Generate bcrypt hash from password with 17 cost
-	// Get hash cost number from settings file
-	hash_cost_number_string, err := ReadFieldInSettingData("HASH_COST_NUMBER")
-	if err != nil {
-		return "", err
-	}
-	// convert hash_cost_number_string to int
-	hash_cost_number, err := strconv.ParseInt(hash_cost_number_string, 10, 64)
-	if err != nil {
-		return "", err
-	}
-	hash_bytes, err := bcrypt.GenerateFromPassword([]byte(pass), int(hash_cost_number))
-	if err != nil {
-		return "", err
-	}
-	return string(hash_bytes), nil
+	sha := sha256.New()
+	sha.Write([]byte(pass))
+	hashed_pass_bytes := sha.Sum(nil)
+
+	return hex.EncodeToString(hashed_pass_bytes), nil
 }
-func ComparePassword(hashed_pass string, pass string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashed_pass), []byte(pass))
+func ComparePassword(hashed_pass string, pass string) (bool, error) {
+	hash_pass, err := HashPassword(pass)
+	if err != nil {
+		return false, err
+	}
+	if hashed_pass == hash_pass {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }
 func IsElementExistsInSlice[t comparable](elem t, slice []t) bool {
 	for _, e := range slice {
