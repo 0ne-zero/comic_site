@@ -1,11 +1,11 @@
 # Comic Website
 ## General Information
-- A simple comic website written in Go
+- A simple comic website written in Go (And in Persian)
 - I don't have credit for front-end of site
 
 ## Screenshot
 - A general view
-- <img src="https://github.com/0ne-zero/comic_site/blob/main/screenshot/ScreenShot.png" width=80% height=80%>
+![shot](./screenshot/ScreenShot.png)
 
 ## Technologies Used
 - Go v1.18
