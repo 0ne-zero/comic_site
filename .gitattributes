@@ -1,2 +1,2 @@
-/statics/css/* linuist-vendored
+/statics/css/** linuist-vendored
 *.css linguist-detectable=false
