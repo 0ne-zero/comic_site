@@ -1,9 +1,11 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -16,55 +18,6 @@ import (
 
 var db *gorm.DB
 
-func InitializeOrGetDB() (*gorm.DB, error) {
-	if db == nil {
-		// Get DSN from setting file
-		// DSN = Data source name (like connection string for database)
-		dsn, err := utilities.ReadFieldInSettingData("DSN")
-		if err != nil {
-			return nil, err
-		}
-
-		// Open connection to database
-		try_again := true
-		for try_again {
-			// Connect to database with gorm
-			db, err = gorm.Open(
-				// Open Databse
-				mysql.New(mysql.Config{DSN: dsn}),
-				// Config GORM
-				&gorm.Config{
-					// Allow create tables with null foreignkey
-					DisableForeignKeyConstraintWhenMigrating: true,
-					// All Datetime in da1tabase is in UTC
-					NowFunc:              func() time.Time { return time.Now().UTC() },
-					FullSaveAssociations: true,
-				})
-
-			if err != nil {
-				// If databse doesn't exists, so we have to create the database
-				if strings.Contains(err.Error(), "Unknown database") {
-					err = utilities.CreateDatabaseFromDSN(dsn)
-					if err != nil {
-						fmt.Println(fmt.Sprintf("Mentioned database in dsn isn't created,program tried to create that database but it can't do that.\nError: %s", err.Error()))
-						os.Exit(1)
-					}
-					// We don't need to set try_again to True, its default value
-					// try_again = true
-				} else {
-					return nil, err
-				}
-			}
-			// We don't need to try again to connect to database because we are connected
-			try_again = false
-		}
-		fmt.Println("We are connected to database")
-		db.Set("gorm:auto_preload", true)
-		return db, nil
-	} else {
-		return db, nil
-	}
-}
 func MigrateModels(db *gorm.DB) error {
 	return db.AutoMigrate(
 		model.User{},
@@ -76,47 +29,120 @@ func MigrateModels(db *gorm.DB) error {
 	)
 }
 
-// Tries to connect to the database and handle errors if any occurred
-func ConnectToDatabaseANDHandleErrors() bool {
-	var err error
-	// Try again to connect to database
-	var try_again bool = true
+func GetDatabaseNameFromDSN(dsn string) string {
+	// w = without
+	w_user_pass_protocol_ip := dsn[strings.LastIndex(dsn, "/")+1:]
+	return w_user_pass_protocol_ip[:strings.LastIndex(w_user_pass_protocol_ip, "?")]
+}
 
-	// Max try to connect, for prevent infinit loop
-	var max_try int = 20
-	var try_count int = 0
-	for try_again {
-		// Break infinit loop
-		if try_count == max_try {
-			return false
+func CreateDatabaseFromDSN(dsn string) error {
+	// Create database
+	dsn_without_database := dsn[:strings.LastIndex(dsn, "/")] + "/"
+	db, err := sql.Open("mysql", dsn_without_database)
+	if err != nil {
+		if !StartMySqlService() {
+			fmt.Println(fmt.Sprintf("We can't connect to mysql and we can't even start mysql.service\nError: %s", err.Error()))
+			os.Exit(1)
+		}
+		db, err = sql.Open("mysql", dsn_without_database)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("mysql.service is in start mode, but for any reason we can't connect to database\nError: %s", err.Error()))
+			os.Exit(1)
+		}
+	}
+	db_name := GetDatabaseNameFromDSN(dsn)
+	_, err = db.Exec("CREATE DATABASE " + db_name)
+	return err
+}
+func StartMySqlService() bool {
+	var service_names = []string{"mysqld.service", "mysql.service"}
+	for i := range service_names {
+		command := fmt.Sprintf("systemctl start %s", service_names[i])
+		_, err := exec.Command("bash", "-c", command).Output()
+		if err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+func connectDB(dsn string) (*gorm.DB, error) {
+	// Connect to database with gorm
+	return gorm.Open(
+		// Open Databse
+		mysql.New(mysql.Config{DSN: dsn}),
+		// Config GORM
+		&gorm.Config{
+			// Allow create tables with null foreignkey
+			DisableForeignKeyConstraintWhenMigrating: true,
+			// All Datetime in database is in UTC
+			NowFunc:              func() time.Time { return time.Now().UTC() },
+			FullSaveAssociations: true,
+		})
+}
+
+// If it couldn't connect to database, and also it didn't close program, returns nil
+func InitializeOrGetDB() *gorm.DB {
+	if db == nil {
+		// DSN = Data source name (like connection string for database)
+		dsn, err := utilities.ReadFieldInSettingData("DSN")
+		if err != nil {
+			return nil
 		}
 
-		db, err = InitializeOrGetDB()
-		try_again = false
-		if err != nil {
-			switch err.(type) {
-			case *net.OpError:
-				op_err := err.(*net.OpError)
-				// Get TCPAddr if exists
-				if tcp_addr, ok := op_err.Addr.(*net.TCPAddr); ok {
-					// Check error occurred when we trired to connect to mysql
-					if tcp_addr.Port == 3306 {
-						// Try to start mysql service
-						res := utilities.StartMySqlService()
-						if !res {
-							try_again = true
+		// For error handling
+		var connect_again = true
+		for connect_again {
+			db, err = connectDB(dsn)
+			if err != nil {
+				// Specific error handling
+
+				//Databse doesn't exists, we have to create the database
+				if strings.Contains(err.Error(), "Unknown database") {
+					err = CreateDatabaseFromDSN(dsn)
+					if err != nil {
+						// Database isn't exists
+						// Also we can't create database from dsn
+						fmt.Println(fmt.Sprintf("Mentioned database in dsn isn't created,program tried to create that database but it can't do that.\nError: %s", err.Error()))
+						os.Exit(1)
+					}
+					// Database created in mysql
+					// Don't check rest of possible errors and try to connect again
+					continue
+				}
+				// Error handling with error type detection
+				switch err.(type) {
+				case *net.OpError:
+					op_err := err.(*net.OpError)
+					// Get TCPAddr if exists
+					if tcp_addr, ok := op_err.Addr.(*net.TCPAddr); ok {
+						// Check error occurred when we trired to connect to mysql
+						if tcp_addr.Port == 3306 {
+							// Try to start mysql service
+							connect_again = StartMySqlService()
 						}
 					}
+				default:
+					fmt.Println("Cannot connect to database\nMaybe you should start database service(deamon)\n" + err.Error())
+					os.Exit(1)
 				}
-			default:
-				fmt.Println("Cannot connect to database " + err.Error())
-				os.Exit(1)
+			} else {
+				// We don't need to try again to connect to database because we are connected
+				connect_again = false
 			}
 		}
-		try_count += 1
+
+		db.Set("gorm:auto_preload", true)
+		return getDB()
+	} else {
+		return getDB()
 	}
-	return true
 }
+
+func getDB() *gorm.DB {
+	return db
+}
+
 func CreateTempData(db *gorm.DB) {
 	db.Create(&model.User{Username: "admin", Email: "admin", PasswordHash: " $2a$08$644UU94RPpGoEfLKuH5XWO1dRVhOITnFpjBHK0NszUuEFKKCzfWGG ", IsAdmin: true})
 	db.Create(&model.User{Username: "regular", Email: "regular", PasswordHash: " $2a$08$644UU94RPpGoEfLKuH5XWO1dRVhOITnFpjBHK0NszUuEFKKCzfWGG ", IsAdmin: true})

@@ -21,6 +21,20 @@
         {{range $c := .Comments}}
             {{template "_comic_comment" $c}}
         {{end}}
+
+        {{if eq .IsLogged true}}
+          <div class="p-3">
+            <form method="post" action="/addcomment/" enctype="application/x-www-form-urlencoded">
+              <input type="hidden" name="comic_id" value="{{.Comic.ID}}">
+              <textarea name="text" id="" cols="30" required="" rows="10" placeholder="نظر خود را بنویسید" class="rounded-xl w-full border-none outline-none focus:outline-none p-2"></textarea>
+              <div class="relative -top-10 flex justify-between px-3 ">
+                <button type="submit" class="bg-gray-500  rounded-lg  shadow text-sm  block text-gray-100 w-16 flex items-center justify-center">
+                  <span>ارسال</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        {{end}}
       </div> 
     </div>
 

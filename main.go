@@ -15,7 +15,7 @@ func main() {
 	fmt.Println("This program needs MySQL,after you install MySQL fill DSN field in setting.json")
 	if !utilities.IsUserRoot() {
 		fmt.Println("Only root user can run this program (:\nProbably you forgot to use 'sudo' command")
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	var err error
 	// Get executable directory path
@@ -28,16 +28,10 @@ func main() {
 	}
 
 	// Connect to database
-	is_connected := database.ConnectToDatabaseANDHandleErrors()
+	db := database.InitializeOrGetDB()
 	// If db is nil we kill the program, because we can't continue without database
-	if is_connected == false {
+	if db == nil {
 		fmt.Println("We really cannot connect to the database")
-		os.Exit(1)
-	}
-	// Get database
-	db, err := database.InitializeOrGetDB()
-	if err != nil {
-		fmt.Println("We had trouble to get database")
 		os.Exit(1)
 	}
 	err = database.MigrateModels(db)

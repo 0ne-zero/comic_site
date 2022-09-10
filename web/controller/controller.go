@@ -439,7 +439,37 @@ func ComicComments(c *gin.Context) {
 		"Comments": comments,
 		"IsLogged": isLogged(c),
 	}
+	view_data["IsLogged"] = true
 	c.HTML(200, "comic_comments.gohtml", view_data)
+}
+func AddComment_POST(c *gin.Context) {
+	user_id, ok := sessions.Default(c).Get("UserID").(int)
+	user_id, ok = 1, true
+	if !ok || user_id == 0 {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	comment_text := c.PostForm("text")
+	comic_id, err := strconv.Atoi(c.PostForm("comic_id"))
+	if err != nil {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	if comment_text == "" {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	if comic_id == 0 {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	// Add comment
+	err = db_function.AddComicComment(user_id, comic_id, comment_text)
+	if err != nil {
+		SomethingWentWrong(constanst.SomethingWentWrongError)(c)
+		return
+	}
+	c.Redirect(http.StatusMovedPermanently, c.Request.Referer())
 }
 func LikingComment(c *gin.Context) {
 	c_id, err := strconv.Atoi(c.Param("c_id"))

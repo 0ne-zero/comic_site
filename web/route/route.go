@@ -55,6 +55,7 @@ func MakeRoute() *gin.Engine {
 
 	r.GET("/comic/:id", controller.Comic_GET)
 	r.GET("/comiccomments/:id", controller.ComicComments)
+	r.POST("/addcomment/", controller.AddComment_POST)
 	// Comment liking
 	r.GET("/liking/:c_id", controller.LikingComment)
 	r.GET("/disliking/:c_id", controller.DislikingComment)
