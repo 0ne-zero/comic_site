@@ -13,7 +13,7 @@
 ![shot](./screenshot/ScreenShot.png)
 
 ## Project Status
-- Project is: __almost_complete__
+- Project is: __Complete__
 
 ## Contact
 - Created by [Pouria Khakpour](https://github.com/0ne-zero) - feel free to contact me!
